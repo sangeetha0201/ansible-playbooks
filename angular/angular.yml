@@ -1,0 +1,27 @@
+- name: Install angular in ubuntu20
+  hosts: localhost
+  become: true
+  tasks:      
+    - name: Update the System Packages
+      apt:
+        update_cache: yes
+
+    - name: Add the Node.js repository
+      shell: "curl -sL https://deb.nodesource.com/setup_14.x | bash -"
+    
+    - name: Install nodejs
+      apt:
+        name: nodejs
+        state: present
+    
+    - name: Install npm latest
+      npm:
+        name: "npm@latest"
+        global: yes
+        state: present
+    
+    - name: Install Angular.js
+      npm:
+        name: "@angular/cli"
+        global: yes
+        state: present
