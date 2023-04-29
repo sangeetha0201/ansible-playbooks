@@ -58,22 +58,20 @@
     
     - name: create tomcat-user.xml file
       copy:
-        src: tomcat-users.xml
-        dest: /opt/tomcat/conf/
+        src: ./etc/tomcat-users.xml
+        dest: /opt/tomcat10/conf/
 
     - name: create context.xml in manager file
       copy:
-        src: manager/context.xmlmanager
-        dest: /opt/tomcat/webapps//META-INF/
+        src: ./etc/manager/META-INF/context.xml
+        dest: /opt/tomcat10/webapps/manager/META-INF/
 
     - name: create context.xml in host-manager file
       copy:
-        src: hostmanager/context.xml
-        dest: /opt/tomcat/webapps/host-manager/META-INF/
+        src: ./etc/host-manager/META-INF/context.xml
+        dest: /opt/tomcat10/webapps/host-manager/META-INF/
 
     - name: Restart Tomcat
       service:
         name: tomcat
         state: restarted
-
-    
