@@ -1,0 +1,17 @@
+- name: Install apache
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install latest version of Apache
+      apt: name=apache2 update_cache=yes state=latest
+
+    - name: Copy Gdal Package
+      copy:
+        src: /home/ubuntu/ansible/index.html
+        dest: /var/www/html/
+    
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
+        
