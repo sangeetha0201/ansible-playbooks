@@ -1,0 +1,10 @@
+- name: Maven-setup
+  hosts: localhost
+  become: yes
+
+  roles:
+    - role: java11
+      tags: java
+
+    - role: maven
+      tags: maven

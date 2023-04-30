@@ -1,0 +1,4 @@
+- name: Install latest version of maven
+  apt: name=maven update_cache=yes state=latest
+
+

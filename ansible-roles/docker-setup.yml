@@ -1,0 +1,9 @@
+- name: docker-setup
+  hosts: localhost
+  become: yes
+  gather_facts: False
+
+  roles:
+    - role: docker
+      tags: docker
+

@@ -1,0 +1,4 @@
+---
+# tasks file for java11
+- name: Install latest version of java
+  apt: name=default-jdk update_cache=yes state=latest

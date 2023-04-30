@@ -1,0 +1,9 @@
+- name: Angular-setup
+  hosts: localhost
+  become: yes
+  gather_facts: False
+
+  roles:
+    - role: angular14
+      tags: angular
+
