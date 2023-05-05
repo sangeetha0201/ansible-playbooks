@@ -1,0 +1,12 @@
+- name: Deploy Docker image
+  hosts: '{{ deploy_server }}'
+  become: yes
+  tasks:
+    - name: Docker stop
+      shell: docker rm -f {{ app_name }}
+
+    - name: Pull docker image sandeep4642/{{ app_name }}:{{ tag_no }}
+      command: docker pull sandeep4642/{{ app_name }}:{{ tag_no }}
+
+    - name: run docker image sandeep4642/{{ app_name }}:{{ tag_no }}
+      command: docker run --name {{ app_name }} -d -p {{ port_no }}:8080 sandeep4642/{{ app_name }}:{{ tag_no }}
