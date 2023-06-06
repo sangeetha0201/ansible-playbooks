@@ -1,0 +1,138 @@
+1. Create a new user for ansible adimnistration and grant admin access to the user (master & slave)
+
+	adduser ansadmin
+
+2. add user in visudo(master & slave)
+
+	sudo visudo
+	sandeep ALL=(ALL) NOPASSWD:ALL
+
+3. Enable user login (master and slave)
+	sudo nano /etc/ssh/sshd_config
+	enable password authentication as yes
+	sudo service sshd restart
+
+4. login as ansadmin user and generate ssh key (master)
+	su ansadmin
+        cd /home/ansadmin/.ssh	
+	ssh-keygen
+
+5. copy keys to target server(master)
+		ssh-copy-id -i id_rsa sandeep@172.31.14.212
+
+6. update target server ip.address in 
+   sudo nano /etc/ansible/hosts
+
+7. Test the connection
+	ansible -m ping all
+
+
+
+$ ansible-playbook tomcat9.yml
+$ ansible-playbook tomcat9.yml --syntax-check
+$ ansible -m ping all
+$ ansible-playbook docker-deploy.yml --extra-vars "build_no=13"
+
+
+
+
+
+
+
+
+
+
+
+
+1.
+
+pipeline {
+    agent any
+    stages {
+        stage('maven build'){
+            steps{
+                sh 'mvn -DskipTests clean install'
+            }
+        }
+        stage('Deploy to tomcat Server'){
+            steps{
+                sh "whoami"
+                sh 'ansible-playbook /home/ubuntu/ansible/tomcat-deploy-dev.yml'
+            }
+        }
+        }
+}
+
+-----------------------------------------------------------------------------------------------------
+2
+pipeline {
+    agent none
+    stages { 
+        stage('maven build'){
+           agent any
+            steps{
+                sh 'mvn -DskipTests clean install'
+                stash includes: '**/target/*.war', name: 'app' 
+            }
+        }
+        stage('Deploy to tomcat Server'){
+           agent {label "ansible-master"}
+            steps{
+                unstash 'app'
+                sh "whoami"
+                sh 'ansible-playbook /home/ubuntu/ansible/tomcat-deploy-dev.yml'
+            }
+        }
+        }
+}
+---------------------------------------------------------------------------------------------------------------
+3.
+pipeline {
+    environment {
+        registry = "sandeep4642/shop-example"
+        registryCredential = 'dockerhub'
+        dockerImage = ''
+      }
+    agent none
+    stages {
+        stage('mvn build'){
+            agent { label "jenkins-docker-slave"}
+            steps{
+                sh 'mvn -DskipTests clean package'
+            }
+        }
+        stage('Building Docker image') {
+            agent { label "jenkins-docker-slave"}
+            steps{
+              script {
+                dockerImage = docker.build registry + ":$BUILD_NUMBER"
+              }
+            }
+        
+        }
+        stage('Deploy push') {
+            agent { label "jenkins-docker-slave"}
+            steps{
+              script {
+                docker.withRegistry( '', registryCredential ) {
+                  dockerImage.push()
+                }
+              }
+            }
+          }
+        stage('Remove Unused docker image') {
+            agent { label "jenkins-docker-slave"}
+            steps{
+              sh "docker rmi $registry:$BUILD_NUMBER"
+            }
+          }
+          stage('Deploy to dev Server'){
+              agent { label "ansible-master"}
+            steps{
+                sh "whoami"
+                sh 'ansible-playbook /home/ubuntu/ansible/docker-deploy-dev.yml'
+        }
+     }
+    }
+}
+-------------------------------------------------------------------------------------------------------------
